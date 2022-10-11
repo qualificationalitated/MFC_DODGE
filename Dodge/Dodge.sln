@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32901.215
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Dodge", "Dodge.vcxproj", "{89B7E70C-B513-4011-BED9-7310B7A461F7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{89B7E70C-B513-4011-BED9-7310B7A461F7}.Debug|x64.ActiveCfg = Debug|x64
+		{89B7E70C-B513-4011-BED9-7310B7A461F7}.Debug|x64.Build.0 = Debug|x64
+		{89B7E70C-B513-4011-BED9-7310B7A461F7}.Debug|x86.ActiveCfg = Debug|Win32
+		{89B7E70C-B513-4011-BED9-7310B7A461F7}.Debug|x86.Build.0 = Debug|Win32
+		{89B7E70C-B513-4011-BED9-7310B7A461F7}.Release|x64.ActiveCfg = Release|x64
+		{89B7E70C-B513-4011-BED9-7310B7A461F7}.Release|x64.Build.0 = Release|x64
+		{89B7E70C-B513-4011-BED9-7310B7A461F7}.Release|x86.ActiveCfg = Release|Win32
+		{89B7E70C-B513-4011-BED9-7310B7A461F7}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B49C7D28-9712-4576-BBF9-551F58CE6FD4}
+	EndGlobalSection
+EndGlobal
