@@ -63,7 +63,8 @@ void CDodgeView::OnDraw(CDC* pDC)
 
 	// TODO: 여기에 원시 데이터에 대한 그리기 코드를 추가합니다.
 	FlickerFreeDC dc{ pDC };
-	m_RedBullet.render(dc);
+	// m_RedBullet.render(dc);
+	m_game.render(dc);
 }
 
 
@@ -95,6 +96,8 @@ void CDodgeView::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	// pos++;
+	// Invalidate();
+	// UpdateWindow();
 	CView::OnMouseMove(nFlags, point);
 }
 
@@ -116,7 +119,9 @@ void CDodgeView::OnTimer(UINT_PTR nIDEvent)
 		double timeElapsed{ std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - m_previousUpdateTime).count()/1000.0 };
 		m_previousUpdateTime = currentTime;
 
-		m_RedBullet.update(timeElapsed);
+		// m_RedBullet.update(timeElapsed);
+
+		m_game.update();
 		Invalidate();
 		UpdateWindow();
 	}
@@ -127,6 +132,7 @@ void CDodgeView::OnTimer(UINT_PTR nIDEvent)
 
 void CDodgeView::OnLButtonDown(UINT nFlags, CPoint point)
 {
+	m_game.start();
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	m_previousUpdateTime = std::chrono::high_resolution_clock::now();
 	m_RedBullet.setDirection({ 1,1 });

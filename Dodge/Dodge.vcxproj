@@ -189,6 +189,7 @@
     <ClInclude Include="DodgeView.h" />
     <ClInclude Include="FlickerFreeDC.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="Game.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="MovingObject.h" />
     <ClInclude Include="pch.h" />
@@ -200,6 +201,7 @@
     <ClCompile Include="Dodge.cpp" />
     <ClCompile Include="DodgeDoc.cpp" />
     <ClCompile Include="DodgeView.cpp" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="MovingObject.cpp" />
     <ClCompile Include="pch.cpp">

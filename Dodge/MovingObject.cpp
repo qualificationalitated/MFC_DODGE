@@ -15,8 +15,12 @@ MovingObject::MovingObject(const Position position, const Direction direction, c
 	setDirection(direction);
 }
 
-void MovingObject::update(const double elapsedTime) {
+void MovingObject::update(const double elapsedTime,Position* onlyCalc) {
 	const double distance = m_speed * elapsedTime;
+	if (onlyCalc) {
+		onlyCalc->x = m_position.x + m_direction.x * distance;
+		onlyCalc->y = m_position.y + m_direction.y * distance;
+	}
 	// 이동할 새 위치 = 기존 위치 + 단위벡터*거리
 	m_position.x = m_position.x + m_direction.x * distance;
 	m_position.y = m_position.y + m_direction.y * distance;

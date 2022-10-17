@@ -24,17 +24,27 @@ public:
 	MovingObject(const Position position,Direction direction, double speed);
 
 	// 물체를 움직이는 함수
-	virtual void update(const double elapsedTime);
+	virtual void update(const double elapsedTime, Position* onlyCalc=nullptr);
 
 	// 렌더링하는 함수
 	virtual void render(FlickerFreeDC& dc) {}
-	// 총알의 방향만 결정, 속도를 결정하지는 않는다
-	void setDirection(const Direction& newDirection);
-	void setPosition(const Position& position) { m_position = position; }
-	void setSpeed(const double speed) { m_speed = speed;  }
 
+	// 물체의 방향만 결정, 속도를 결정하지는 않는다
+	void setDirection(const Direction& newDirection);
+	// 물체의 방향 얻기
+	Direction getDirection() const { return m_direction; }
+
+	// 물체의 위치, 속도를 결정하지는 않는다
+	void setPosition(const Position& position) { m_position = position; }
+	// 물체 좌표상 위치 얻기
 	const Position& getPosition() const { return m_position; }
-	double getSpeed() { return m_speed; }
+
+	// 물체 속도 결정
+	void setSpeed(const double speed) { m_speed = speed;  }
+	// 물체의 속도 얻기
+	double getSpeed() const { return m_speed; }
+	
+
 
 private:
 	// @m_speed :pixel per sec

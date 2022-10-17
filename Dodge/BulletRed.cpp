@@ -14,12 +14,16 @@ BulletRed::BulletRed(const CString& imageFileName, const CSize m_bulletSize,
 	m_ImageBulletRed.Load(imageFileName);
 }
 
-void BulletRed::update(const double elapsedTime) {
-	MovingObject::update(elapsedTime);
+void BulletRed::update(const double elapsedTime, Position* onlyCalc) {
+	MovingObject::update(elapsedTime, onlyCalc);
+	if (onlyCalc)
+		return;
 }
 
-// 플리커링 제거를 위한 렌더함수 구현
+// 플리커링이 제거된 형태의 오브젝트 구현을 위한 렌더함수 구현
 void BulletRed::render(FlickerFreeDC& dc) {
+	// 생성할 오브젝트의 위치를 받아오는 함수
 	const auto& position{ getPosition() };
+	// 해당 위치에 그림을 그려준다
 	m_ImageBulletRed.Draw(dc.GetSafeHdc(), position.x, position.y, m_bulletSize.cx, m_bulletSize.cy);
 }

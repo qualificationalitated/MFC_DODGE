@@ -5,6 +5,7 @@
 #pragma once
 #include <chrono>
 #include "BulletRed.h"
+#include "Game.h"
 
 const UINT_PTR GAME_TIMER{1};
 class CDodgeView : public CView
@@ -47,7 +48,9 @@ private:
 
 	// 붉은 탄막객체 생성
 	BulletRed m_RedBullet{ _T("BulletRed.png") ,CSize{14,14}, Position{100.0,70.0},
-		Direction{1.0,1.0},200.0};
+		Direction{1.0,1.0},200.0 };
+	Game m_game;
+
 public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
