@@ -29,7 +29,10 @@ ON_WM_MOUSEMOVE()
 ON_WM_ERASEBKGND()
 ON_WM_TIMER()
 ON_WM_LBUTTONDOWN()
-ON_WM_RBUTTONDOWN()
+//ON_WM_RBUTTONDOWN()
+//ON_WM_GETMINMAXINFO()
+ON_WM_KEYDOWN()
+ON_WM_KEYUP()
 END_MESSAGE_MAP()
 
 // CDodgeView 생성/소멸
@@ -48,7 +51,6 @@ BOOL CDodgeView::PreCreateWindow(CREATESTRUCT& cs)
 {
 	// TODO: CREATESTRUCT cs를 수정하여 여기에서
 	//  Window 클래스 또는 스타일을 수정합니다.
-
 	return CView::PreCreateWindow(cs);
 }
 
@@ -132,18 +134,56 @@ void CDodgeView::OnTimer(UINT_PTR nIDEvent)
 
 void CDodgeView::OnLButtonDown(UINT nFlags, CPoint point)
 {
+	// 마우스 좌클릭시 게임을 시작
 	m_game.start();
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	m_previousUpdateTime = std::chrono::high_resolution_clock::now();
-	m_RedBullet.setDirection({ 1,1 });
 	SetTimer(GAME_TIMER,10,NULL);
 }
 
 
-void CDodgeView::OnRButtonDown(UINT nFlags, CPoint point)
+
+void CDodgeView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	m_RedBullet.setSpeed(m_RedBullet.getSpeed() * 2.0);
-	m_RedBullet.setDirection({ 6,-30 });
-	CView::OnRButtonDown(nFlags, point);
+	switch (nChar)
+	{
+	case VK_LEFT:
+		m_game.DirKeyDown(KeyDirection::ArrowLeft);
+		break;
+	case VK_RIGHT:
+		m_game.DirKeyDown(KeyDirection::ArrowRight);
+		break;
+	case VK_UP:
+		m_game.DirKeyDown(KeyDirection::ArrowUp);
+		break;
+	case VK_DOWN:
+		m_game.DirKeyDown(KeyDirection::ArrowDown);
+		break;
+	}
+
+	CView::OnKeyDown(nChar, nRepCnt, nFlags);
+}
+
+
+void CDodgeView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	switch (nChar)
+	{
+	case VK_LEFT:
+		m_game.DirKeyUp(KeyDirection::ArrowLeft);
+		break;
+	case VK_RIGHT:
+		m_game.DirKeyUp(KeyDirection::ArrowRight);
+		break;
+	case VK_UP:
+		m_game.DirKeyUp(KeyDirection::ArrowUp);
+		break;
+	case VK_DOWN:
+		m_game.DirKeyUp(KeyDirection::ArrowDown);
+		break;
+	}
+
+	CView::OnKeyUp(nChar, nRepCnt, nFlags);
 }

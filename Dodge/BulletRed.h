@@ -4,6 +4,7 @@
 */
 
 #include<string>
+#include<memory>
 #include "FlickerFreeDC.h"
 #include "MovingObject.h"
 

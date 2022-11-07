@@ -28,6 +28,7 @@ void MovingObject::update(const double elapsedTime,Position* onlyCalc) {
 
 void MovingObject::setDirection(const Direction& newDirection) {
 	// 단위벡터 생성, 탄막의 방향 결정
+	// 0,0 넣으면 터짐, 0벡터가 안되는거 수정 예정
 	const double newVectorLength = sqrt(pow(newDirection.x, 2) + pow(newDirection.y, 2));
 	m_direction.x = newDirection.x / newVectorLength;
 	m_direction.y = newDirection.y / newVectorLength;

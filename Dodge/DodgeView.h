@@ -44,19 +44,20 @@ protected:
 private:
 	// 탄막 위치 설정용 변수
 	std::chrono::steady_clock::time_point m_previousUpdateTime;
-	int pos{1};
-
-	// 붉은 탄막객체 생성
-	BulletRed m_RedBullet{ _T("BulletRed.png") ,CSize{14,14}, Position{100.0,70.0},
-		Direction{1.0,1.0},200.0 };
+	// int pos{1};
+	// 게임 시작
 	Game m_game;
+	// 붉은 탄막객체 생성
+	// BulletRed m_RedBullet{ _T("BulletRed.png") ,CSize{14,14}, Position{100.0,70.0},Direction{1.0,1.0},200.0 };
+	
 
 public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 };
 
 #ifndef _DEBUG  // DodgeView.cpp의 디버그 버전
