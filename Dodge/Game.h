@@ -17,20 +17,26 @@ private:
 	void updateBullet(double timeElapsed,BulletRed& bulletRed);
 	void updatePlayer(double timeElapsed);
 	std::chrono::steady_clock::time_point m_previousUpdateTime;
+	std::chrono::steady_clock::time_point m_gameStartTime;
+	std::chrono::milliseconds m_gameScore;
 	// Åº¸· & ÇÃ·¹ÀÌ¾î °´Ã¼ »ý¼º
 	Player m_player{ _T("Player.png"),CSize{44, 40}, Position{m_playingArea.right / 2.0,m_playingArea.bottom / 2.0}, Direction{0, 0}, 250.0 };
-	// void setInitialBallStatus();
-	// void makeRedBulletGroup();
+
+	/*
 	int randomSpeed = (rand() % 100) + 150.0;
 	int randPosX{ (rand() % 1020) }, randPosY{ (rand() % 885 ) };
 	BulletRed m_RedBullet1{ _T("BulletRed.png") ,CSize{14,14},
 		Position{(double)randPosX,(double)randPosY},
 		Direction{m_playingArea.CenterPoint().x - (double)randPosX ,m_playingArea.CenterPoint().y - (double)randPosY },
 		randomSpeed };
-	
-	// BulletRed m_RedBullet1{ _T("BulletRed.png") ,CSize{14,14}, Position{200.0,100.0}, Direction{1.0,1.0},200.0 };
-	// BulletRed m_RedBullet2{ _T("BulletRed.png") ,CSize{14,14}, Position{200.0,100.0}, Direction{1.0,-3.0},200.0 };
-	// BulletRed m_RedBullet3{ _T("BulletRed.png") ,CSize{14,14}, Position{200.0,100.0}, Direction{4.0,1.0},200.0 };
+	*/
+	BulletRed *bulletList[6];
+	// CArray<BulletRed, BulletRed&> *bulletList;
+	/*
+	BulletRed m_RedBullet1{ _T("BulletRed.png") ,CSize{14,14}, Position{200.0,100.0}, Direction{1.0,1.0},200.0 };
+	BulletRed m_RedBullet2{ _T("BulletRed.png") ,CSize{14,14}, Position{200.0,100.0}, Direction{1.0,-3.0},200.0 };
+	BulletRed m_RedBullet3{ _T("BulletRed.png") ,CSize{14,14}, Position{200.0,100.0}, Direction{4.0,1.0},200.0 };
+	*/
 	
 
 public:
@@ -43,6 +49,8 @@ public:
 	void start();
 	void end();
 	int getGameStatus();
+
+	boolean playerCollisionDetection(double r1x, double r1y, double r1w, double r1h, double r2x, double r2y, double r2w, double r2h);
 	
 };
 

@@ -8,14 +8,29 @@ void Game::render(FlickerFreeDC& dc) {
 		dc.TextOut(m_playingArea.Width() / 2, m_playingArea.Height() / 4 * 3, _T("게임 시작을 위해 스페이스바를 눌러주세요"));
 		return;
 	}
-	CString tempDir;
-	tempDir.Format(_T("x : %lf, y : %lf"), m_player.getDirection().x, m_player.getDirection().y);
+	CString tempDir, tempTime;
+	m_gameScore = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - m_gameStartTime);
+
+	// 플레이어 이동 방향 표현
+	tempDir.Format(_T("Dir x : %d, Dir y : %d"), (int)m_player.getDirection().x, (int)m_player.getDirection().y);
 	dc.TextOut(100, 50, tempDir);
+
+	// 생존 시간을 활용한 스코어 계산
+	tempTime.Format(_T("score : %d"), m_gameScore /10);
+	dc.TextOut(100, 100, tempTime);
+
 	// 플레이어 및 객체 렌더링
 	m_player.render(dc);
+	
+	for(int i=0; i < 5; i++){
+		bulletList[i]->render(dc);
+	}
+	// -------------------------------------------------------------------------------------------------------------------------------------------- -
+	/*
 	m_RedBullet1.render(dc);
-	// m_RedBullet2.render(dc);
-	// m_RedBullet3.render(dc);
+	m_RedBullet2.render(dc);
+	m_RedBullet3.render(dc);
+	*/
 	
 	//플레이어 히트박스 확인
 	auto hitbox{ m_player.getHitbox() };
@@ -29,19 +44,40 @@ void Game::updateBullet(double timeElapsed,BulletRed& bulletRed) {
 	// 만일 충돌했다면, 총알의 방향을 바꾸고(튕기기) 공 움직임을 제어한다
 	bulletRed.update(timeElapsed);
 	Position BulletPos = bulletRed.getPosition();
+	CSize BulletSize = bulletRed.getBulletSize();
 	CRect PlayerPos = m_player.getHitbox();
+	
 	// 벽에 닿았다면, 플레이어를 향해 이동
-	if (BulletPos.y + bulletRed.getBulletSize().cy >= m_playingArea.bottom ||
+	if (BulletPos.y + BulletSize.cy >= m_playingArea.bottom ||
 		BulletPos.y <= m_playingArea.top ||
-		BulletPos.x + bulletRed.getBulletSize().cx >= m_playingArea.right ||
+		BulletPos.x + BulletSize.cx >= m_playingArea.right ||
 		BulletPos.x <= m_playingArea.left
 		) {
 		// auto oldDirection{ bulletRed.getDirection() };
 		bulletRed.setDirection(Direction{ PlayerPos.CenterPoint().x-BulletPos.x, PlayerPos.CenterPoint().y - BulletPos.y });
 	}
+	if (playerCollisionDetection(PlayerPos.left, PlayerPos.top, PlayerPos.Width(), PlayerPos.Height(), BulletPos.x, BulletPos.y, BulletSize.cx, BulletSize.cy)) {
+		// 충돌, 충돌시 게임 종료까지 되면 된다.
+		end();
+		bulletRed.setDirection(Direction{ -bulletRed.getDirection().x, -bulletRed.getDirection().y });
+	}
 	// 공 움직이기
 	bulletRed.update(timeElapsed);
 }
+
+boolean Game::playerCollisionDetection(double r1x, double r1y, double r1w, double r1h, double r2x, double r2y, double r2w, double r2h) {
+
+	// are the sides of one rectangle touching the other?
+
+	if (r1x + r1w >= r2x &&    // r1 right edge past r2 left
+		r1x <= r2x + r2w &&    // r1 left edge past r2 right
+		r1y + r1h >= r2y &&    // r1 top edge past r2 bottom
+		r1y <= r2y + r2h) {    // r1 bottom edge past r2 top
+		return true;
+	}
+	return false;
+}
+
 void Game::updatePlayer(double timeElapsed) {
 	m_player.update(timeElapsed);
 	// 벽 넘어 이동 금지
@@ -80,22 +116,46 @@ void Game::update() {
 	m_previousUpdateTime = currentTime;
 
 	// 모든 객체들 업데이트하기
+	for (int i = 0; i < 5; i++) {
+		updateBullet(timeElapsed, *bulletList[i]);
+	}
+	/*
 	updateBullet(timeElapsed, m_RedBullet1);
-	// updateBullet(timeElapsed, m_RedBullet2);
-	// updateBullet(timeElapsed, m_RedBullet3);
+	updateBullet(timeElapsed, m_RedBullet2);
+	updateBullet(timeElapsed, m_RedBullet3);
+	*/
 	updatePlayer(timeElapsed);
 
 }
 
 void Game::start() {
 	srand((unsigned int)(time(NULL)));
+	m_gameEnded = false;
 	m_gameStarted = true;
+	srand(time(NULL));
+	for (int i = 0; i < 5; i++) {
+		double speed = rand() % 100 + 150.0;
+		double randPosX{ (double)(rand() % 1020) }, randPosY{ (double)(rand() % 885) };
+		bulletList[i] = new BulletRed{ _T("BulletRed.png") ,CSize{14,14}, 
+			Position{randPosX,randPosY}, 
+			Direction{m_playingArea.CenterPoint().x - (double)randPosX ,m_playingArea.CenterPoint().y - (double)randPosY },
+			speed };
+	}
+
 	m_previousUpdateTime = std::chrono::high_resolution_clock::now();
-	// 총알 생성도 여기서 할까요?
+	m_gameStartTime = std::chrono::high_resolution_clock::now();
 }
 
 void Game::end(){
-	m_gameEnded = true;
+	m_gameEnded = true; // 화면 정지는 된느듯
+	/* 
+	* 게임 정지시 동작
+	* 1. 플레이어 및 탄막 동작 정지
+	* 2. 화면 중앙에 플레이어 점수 표시
+	* 3. 다시 플레이 하실? 점수 표시
+	* 4. 최고기록 표시(구글 dino rush 예시)
+	* 게임 종료방법 찾아보기
+	*/ 
 }
 
 // void Game::makeRedBulletGroup(){}
