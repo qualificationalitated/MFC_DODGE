@@ -2,28 +2,25 @@
 #include "Game.h"
 
 void Game::render(FlickerFreeDC& dc) {
-	if (!m_gameStarted)
-		return;
 	Gdiplus::Graphics gr(dc);
-	Pen pen(Color(255, 255, 255, 0), 10);
-	SolidBrush blackBrush(Color(255, 20, 60, 170));
-	//draw Play Area
-	gr.FillRectangle(&blackBrush, 0, m_playingArea.left, m_playingArea.Width(), m_playingArea.Height());
-	gr.DrawRectangle(&pen, m_playingArea.top, m_playingArea.left,
-		m_playingArea.Width(), m_playingArea.Height());
+	if (!m_gameStarted) {
+		// 게임 시작, 초기 실행화면 설정해주기
+		dc.TextOut(m_playingArea.Width() / 2, m_playingArea.Height() / 4 * 3, _T("게임 시작을 위해 스페이스바를 눌러주세요"));
+		return;
+	}
+	CString tempDir;
+	tempDir.Format(_T("x : %lf, y : %lf"), m_player.getDirection().x, m_player.getDirection().y);
+	dc.TextOut(100, 50, tempDir);
 	// 플레이어 및 객체 렌더링
 	m_player.render(dc);
 	m_RedBullet1.render(dc);
-	m_RedBullet2.render(dc);
-	m_RedBullet3.render(dc);
+	// m_RedBullet2.render(dc);
+	// m_RedBullet3.render(dc);
 	
 	//플레이어 히트박스 확인
 	auto hitbox{ m_player.getHitbox() };
 	Pen pen4Hitbox(Color(255, 255, 255, 0), 2);
 	gr.DrawRectangle(&pen4Hitbox, hitbox.left, hitbox.top, hitbox.Width(), hitbox.Height());
-
-	
-	
 }
 
 void Game::updateBullet(double timeElapsed,BulletRed& bulletRed) {
@@ -31,29 +28,17 @@ void Game::updateBullet(double timeElapsed,BulletRed& bulletRed) {
 	// 총알이 벽에 부딛히거나, 벽을 통과하고자 할때인지 확인
 	// 만일 충돌했다면, 총알의 방향을 바꾸고(튕기기) 공 움직임을 제어한다
 	bulletRed.update(timeElapsed);
-	// 바닥면 & 윗면
-	if (bulletRed.getPosition().y + bulletRed.getBulletSize().cy >= m_playingArea.bottom ||
-		bulletRed.getPosition().y <= m_playingArea.top) {
-		auto oldDirection{ bulletRed.getDirection() };
-		bulletRed.setDirection(Direction{ oldDirection.x,-oldDirection.y });
-		// m_RedBullet.setPosition(oldPosition);
-		// m_RedBullet.update(timeElapsed);
+	Position BulletPos = bulletRed.getPosition();
+	CRect PlayerPos = m_player.getHitbox();
+	// 벽에 닿았다면, 플레이어를 향해 이동
+	if (BulletPos.y + bulletRed.getBulletSize().cy >= m_playingArea.bottom ||
+		BulletPos.y <= m_playingArea.top ||
+		BulletPos.x + bulletRed.getBulletSize().cx >= m_playingArea.right ||
+		BulletPos.x <= m_playingArea.left
+		) {
+		// auto oldDirection{ bulletRed.getDirection() };
+		bulletRed.setDirection(Direction{ PlayerPos.CenterPoint().x-BulletPos.x, PlayerPos.CenterPoint().y - BulletPos.y });
 	}
-	// 오른쪽면
-	if (bulletRed.getPosition().x + bulletRed.getBulletSize().cx >= m_playingArea.right ||
-		bulletRed.getPosition().x <= m_playingArea.left) {
-		auto oldDirection{ bulletRed.getDirection() };
-		bulletRed.setDirection(Direction{ -oldDirection.x,oldDirection.y });
-		// m_RedBullet.setPosition(oldPosition);
-		// m_RedBullet.update(timeElapsed);
-	}
-
-	// 플레이어 접촉 확인 부분
-	// auto hitbox{ m_player.getHitbox() };
-	// if(플레이어 접촉)
-	// {게임 종료 및 게임 종료 메세지 출력}
-
-
 	// 공 움직이기
 	bulletRed.update(timeElapsed);
 }
@@ -72,11 +57,23 @@ void Game::updatePlayer(double timeElapsed) {
 	// 오른쪽 경계
 	if (m_player.getHitbox().right >= m_playingArea.right) 
 		m_player.setPosition({ (double)m_playingArea.right - m_player.getPlayerSize().cx, m_player.getPosition().y});
-	
+	// 플레이어 접촉 확인 부분
+	// auto hitbox{ m_player.getHitbox() };
+	// if(플레이어 접촉)
+	// {m_game.setGameStatus, 게임 종료 설정해주고, 버틴 점수 띄워주기}
+
+}
+
+int Game::getGameStatus() {
+	// 시작 안했으면 0, 동작중은 1, 종료시 2 리턴
+	if (!m_gameStarted)
+		return 0;
+	else
+		return m_gameEnded + 1;
 }
 
 void Game::update() {
-	if (!m_gameStarted)
+	if (!m_gameStarted || m_gameEnded)
 		return;
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	double timeElapsed{ std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - m_previousUpdateTime).count() / 1000.0 };
@@ -84,63 +81,63 @@ void Game::update() {
 
 	// 모든 객체들 업데이트하기
 	updateBullet(timeElapsed, m_RedBullet1);
-	updateBullet(timeElapsed, m_RedBullet2);
-	updateBullet(timeElapsed, m_RedBullet3);
+	// updateBullet(timeElapsed, m_RedBullet2);
+	// updateBullet(timeElapsed, m_RedBullet3);
 	updatePlayer(timeElapsed);
 
 }
 
 void Game::start() {
+	srand((unsigned int)(time(NULL)));
 	m_gameStarted = true;
 	m_previousUpdateTime = std::chrono::high_resolution_clock::now();
+	// 총알 생성도 여기서 할까요?
 }
+
+void Game::end(){
+	m_gameEnded = true;
+}
+
+// void Game::makeRedBulletGroup(){}
 
 void Game::DirKeyDown(KeyDirection key) {
 	
-	const double speed{ 250.0 };
+	Direction nextDir= m_player.getDirection();
 	switch (key)
 	{
 	case KeyDirection::ArrowUp:
-		m_player.setDirection({ 0.0 ,-1.0 });
-		m_player.setSpeed(speed);
+		nextDir.y > -1 ? nextDir.y -= 1 : nextDir.y = -1;
 		break;
 	case KeyDirection::ArrowDown:
-		m_player.setDirection({ 0.0, 1.0 });
-		m_player.setSpeed(speed);
+		nextDir.y < 1 ? nextDir.y += 1 : nextDir.y = 1;
 		break;
 	case KeyDirection::ArrowRight:
-		m_player.setDirection({ 1.0, 0.0 });
-		m_player.setSpeed(speed);
+		nextDir.x < 1 ? nextDir.x += 1 : nextDir.x = 1;
 		break;
 	case KeyDirection::ArrowLeft:
-		m_player.setDirection({ -1.0, 0.0 });
-		m_player.setSpeed(speed);
+		nextDir.x > -1 ? nextDir.x -= 1 : nextDir.x = -1;
 		break;
 	}
+	m_player.setDirection({ nextDir.x, nextDir.y });
 }
 
 void Game::DirKeyUp(KeyDirection key) {
 
-	const double speed{ 250.0 };
+	Direction nextDir = m_player.getDirection();
 	switch (key)
 	{
-	default:
-		m_player.setSpeed(0.0);
-		break;
-
-		/*
 	case KeyDirection::ArrowUp:
-		m_player.setSpeed(0.0);
+		nextDir.y < 1 ? nextDir.y += 1 : nextDir.y = 1;
 		break;
 	case KeyDirection::ArrowDown:
-		m_player.setSpeed(0.0);
+		nextDir.y > -1 ? nextDir.y -= 1 : nextDir.y = -1;
 		break;
 	case KeyDirection::ArrowRight:
-		m_player.setSpeed(0.0);
+		nextDir.x > -1 ? nextDir.x -= 1 : nextDir.x = -1;
 		break;
 	case KeyDirection::ArrowLeft:
-		m_player.setSpeed(0.0);
+		nextDir.x < 1 ? nextDir.x += 1 : nextDir.x = 1;
 		break;
-		*/
 	}
+	m_player.setDirection({ nextDir.x, nextDir.y });
 }

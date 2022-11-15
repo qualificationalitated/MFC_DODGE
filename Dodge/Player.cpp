@@ -24,9 +24,9 @@ void Player::render(FlickerFreeDC& dc) {
 
 CRect Player::getHitbox() {
 	CRect hitbox;
-	hitbox.left = getPosition().x + getPlayerSize().cx*0.17;
-	hitbox.right = getPosition().x + getPlayerSize().cx*0.83;
-	hitbox.top = getPosition().y + getPlayerSize().cy*0.2;
-	hitbox.bottom = getPosition().y + getPlayerSize().cy*0.8;
+	hitbox.left = getPosition().x + getPlayerSize().cx * 0.17;
+	hitbox.right = getPosition().x + getPlayerSize().cx * 0.83;
+	hitbox.top = getPosition().y + getPlayerSize().cy * 0.2;
+	hitbox.bottom = getPosition().y + getPlayerSize().cy * 0.8;
 	return hitbox;
 }

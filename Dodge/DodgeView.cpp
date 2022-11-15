@@ -65,7 +65,15 @@ void CDodgeView::OnDraw(CDC* pDC)
 
 	// TODO: 여기에 원시 데이터에 대한 그리기 코드를 추가합니다.
 	FlickerFreeDC dc{ pDC };
-	// m_RedBullet.render(dc);
+	Gdiplus::Graphics gr(dc);
+
+	Pen pen(Color(255, 255, 255, 0), 10);
+	SolidBrush blackBrush(Color(255, 20, 60, 170));
+	CRect windowRect;
+	GetClientRect(windowRect);
+	gr.FillRectangle(&blackBrush, 0, windowRect.left, windowRect.Width(), windowRect.Height());
+	gr.DrawRectangle(&pen, windowRect.top, windowRect.left, windowRect.Width(), windowRect.Height());
+
 	m_game.render(dc);
 }
 
@@ -134,11 +142,13 @@ void CDodgeView::OnTimer(UINT_PTR nIDEvent)
 
 void CDodgeView::OnLButtonDown(UINT nFlags, CPoint point)
 {
+	/*
 	// 마우스 좌클릭시 게임을 시작
 	m_game.start();
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	m_previousUpdateTime = std::chrono::high_resolution_clock::now();
 	SetTimer(GAME_TIMER,10,NULL);
+	*/
 }
 
 
@@ -146,23 +156,30 @@ void CDodgeView::OnLButtonDown(UINT nFlags, CPoint point)
 void CDodgeView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	switch (nChar)
-	{
-	case VK_LEFT:
-		m_game.DirKeyDown(KeyDirection::ArrowLeft);
-		break;
-	case VK_RIGHT:
-		m_game.DirKeyDown(KeyDirection::ArrowRight);
-		break;
-	case VK_UP:
-		m_game.DirKeyDown(KeyDirection::ArrowUp);
-		break;
-	case VK_DOWN:
-		m_game.DirKeyDown(KeyDirection::ArrowDown);
-		break;
+	if(nChar==VK_SPACE && !m_game.getGameStatus()) {
+		m_game.start();
+		m_previousUpdateTime = std::chrono::high_resolution_clock::now();
+		SetTimer(GAME_TIMER, 10, NULL);
+	}
+	else if (m_game.getGameStatus() == 1) {
+		switch (nChar)
+		{
+		case VK_LEFT:
+			m_game.DirKeyDown(KeyDirection::ArrowLeft);
+			break;
+		case VK_RIGHT:
+			m_game.DirKeyDown(KeyDirection::ArrowRight);
+			break;
+		case VK_UP:
+			m_game.DirKeyDown(KeyDirection::ArrowUp);
+			break;
+		case VK_DOWN:
+			m_game.DirKeyDown(KeyDirection::ArrowDown);
+			break;
+		}
 	}
 
-	CView::OnKeyDown(nChar, nRepCnt, nFlags);
+	// CView::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
 
