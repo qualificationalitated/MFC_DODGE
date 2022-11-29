@@ -14,7 +14,7 @@ void Player::update(const double elapsedTime, Position* onlyCalc) {
 	
 }
 
-// 플리커링이 제거된 형태의 오브젝트 구현을 위한 렌더함수 구현
+
 void Player::render(FlickerFreeDC& dc) {
 	// 생성할 오브젝트의 위치를 받아오는 함수
 	const auto& position{ getPosition() };
@@ -30,3 +30,4 @@ CRect Player::getHitbox() {
 	hitbox.bottom = getPosition().y + getPlayerSize().cy * 0.8;
 	return hitbox;
 }
+// 플리커링이 제거된 형태의 오브젝트 구현을 위한 렌더함수 구현

@@ -42,21 +42,21 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 private:
-	// 탄막 위치 설정용 변수
-	std::chrono::steady_clock::time_point m_previousUpdateTime;
-	// int pos{1};
-	// 게임 시작
-	Game m_game;
-	// 붉은 탄막객체 생성
-	// BulletRed m_RedBullet{ _T("BulletRed.png") ,CSize{14,14}, Position{100.0,70.0},Direction{1.0,1.0},200.0 };
+	std::chrono::steady_clock::time_point m_previousUpdateTime; // 탄막 위치 설정용 변수
+	Game m_game; // 플레이하는 게임을 나타내는 객체
 	
 
 public:
-	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	// 플리커링 제거를 위한 설정중 하나
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+
+	// 시간이 지나며 자동으로 화면을 업데이트 한다
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
-	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+
+	// 게임 시작 및 플레이어 이동을 제어하기 위한 키 다운
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+
+	// 플레이어 이동을 제어하기 위한 키 업
 	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 };
 

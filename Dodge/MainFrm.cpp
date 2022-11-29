@@ -57,6 +57,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 {
+	// 윈도우 화면 크기 설정
 	if( !CFrameWnd::PreCreateWindow(cs) )
 		return FALSE;
 	cs.cx = 1020;
@@ -89,6 +90,7 @@ void CMainFrame::Dump(CDumpContext& dc) const
 void CMainFrame::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	// 화면 크기 고정
 	lpMMI->ptMinTrackSize.x = 1020;
 	lpMMI->ptMinTrackSize.y = 885;
 	lpMMI->ptMaxTrackSize.x = 1020;

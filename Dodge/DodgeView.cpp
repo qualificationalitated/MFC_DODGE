@@ -24,13 +24,8 @@
 IMPLEMENT_DYNCREATE(CDodgeView, CView)
 
 BEGIN_MESSAGE_MAP(CDodgeView, CView)
-//	ON_WM_LBUTTONDOWN()
-ON_WM_MOUSEMOVE()
 ON_WM_ERASEBKGND()
 ON_WM_TIMER()
-ON_WM_LBUTTONDOWN()
-//ON_WM_RBUTTONDOWN()
-//ON_WM_GETMINMAXINFO()
 ON_WM_KEYDOWN()
 ON_WM_KEYUP()
 END_MESSAGE_MAP()
@@ -39,8 +34,6 @@ END_MESSAGE_MAP()
 
 CDodgeView::CDodgeView() noexcept
 {
-	// m_BulletRed.Load(_T("BulletRed.png"));
-
 }
 
 CDodgeView::~CDodgeView()
@@ -55,7 +48,6 @@ BOOL CDodgeView::PreCreateWindow(CREATESTRUCT& cs)
 }
 
 // CDodgeView 그리기
-
 void CDodgeView::OnDraw(CDC* pDC)
 {
 	CDodgeDoc* pDoc = GetDocument();
@@ -64,16 +56,17 @@ void CDodgeView::OnDraw(CDC* pDC)
 		return;
 
 	// TODO: 여기에 원시 데이터에 대한 그리기 코드를 추가합니다.
-	FlickerFreeDC dc{ pDC };
-	Gdiplus::Graphics gr(dc);
+	FlickerFreeDC dc{ pDC }; // 플리커링이 제거된 dc 객체로 구현
+	Gdiplus::Graphics gr(dc); // 그래픽으로 화면 출력을 위한 객체 생성
 
 	Pen pen(Color(255, 255, 255, 0), 10);
 	SolidBrush bgdBrush(Color(255, 17, 38, 79));
 	CRect windowRect;
+	
+	// 화면 배경 및 테두리 선 설정
 	GetClientRect(windowRect);
 	gr.FillRectangle(&bgdBrush, 0, windowRect.left, windowRect.Width(), windowRect.Height());
 	gr.DrawRectangle(&pen, windowRect.top, windowRect.left, windowRect.Width(), windowRect.Height());
-
 	m_game.render(dc);
 }
 
@@ -102,23 +95,11 @@ CDodgeDoc* CDodgeView::GetDocument() const // 디버그되지 않은 버전은 �
 // CDodgeView 메시지 처리기
 
 
-void CDodgeView::OnMouseMove(UINT nFlags, CPoint point)
-{
-	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	// pos++;
-	// Invalidate();
-	// UpdateWindow();
-	CView::OnMouseMove(nFlags, point);
-}
-
-// 화면 플리커링 제거를 위한 메세지 핸들러
 BOOL CDodgeView::OnEraseBkgnd(CDC* pDC)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-
 	return FALSE;
 }
-
 
 void CDodgeView::OnTimer(UINT_PTR nIDEvent)
 {
@@ -129,8 +110,7 @@ void CDodgeView::OnTimer(UINT_PTR nIDEvent)
 		double timeElapsed{ std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - m_previousUpdateTime).count()/1000.0 };
 		m_previousUpdateTime = currentTime;
 
-		// m_RedBullet.update(timeElapsed);
-
+		// 시간이 지나며 자동으로 화면을 업데이트합니다.
 		m_game.update();
 		Invalidate();
 		UpdateWindow();
@@ -139,29 +119,23 @@ void CDodgeView::OnTimer(UINT_PTR nIDEvent)
 	CView::OnTimer(nIDEvent);
 }
 
-
-void CDodgeView::OnLButtonDown(UINT nFlags, CPoint point)
-{
-	/*
-	// 마우스 좌클릭시 게임을 시작
-	m_game.start();
-	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	m_previousUpdateTime = std::chrono::high_resolution_clock::now();
-	SetTimer(GAME_TIMER,10,NULL);
-	*/
-}
-
-
-
 void CDodgeView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	// 스페이스바 클릭시 게임이 시작되지 않았다면
 	if(nChar==VK_SPACE && !m_game.getGameStatus()) {
+		// 게임 시작 및 시작시간을 체크
 		m_game.start();
 		m_previousUpdateTime = std::chrono::high_resolution_clock::now();
 		SetTimer(GAME_TIMER, 10, NULL);
 	}
+	// 스페이스바 클릭시 게임이 종료된 상태라면
+	else if (nChar == VK_SPACE && m_game.getGameStatus() == 2) {
+		// 게임 초기상태로 되돌리기
+		m_game.setInitialGame();
+	}
+	// 게임이 플레이중이라면
 	else if (m_game.getGameStatus() == 1) {
+		// 유저의 키 입력에 따라 플레이어를 움직인다.
 		switch (nChar)
 		{
 		case VK_LEFT:
@@ -178,14 +152,11 @@ void CDodgeView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			break;
 		}
 	}
-
-	// CView::OnKeyDown(nChar, nRepCnt, nFlags);
 }
-
 
 void CDodgeView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	// 유저의 키 입력에 따라 플레이어 이동을 멈춘다.
 	switch (nChar)
 	{
 	case VK_LEFT:

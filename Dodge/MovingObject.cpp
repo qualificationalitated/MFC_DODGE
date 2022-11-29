@@ -8,13 +8,7 @@
 MovingObject::MovingObject(const Position position, const Direction direction, const double speed) :
 	m_position{ position },  m_speed{speed}
 {
-	// 움직임이 없으면, 에러메세지를 출력한다. 방향벡터가 0이면 안되는 상황이라서
-	/*
-	if ((!(int)m_direction.x) || (!(int)m_direction.y)) {
-		assert(false);
-	}
-	*/
-
+	// 객체 이동방향 결정
 	setDirection(direction);
 }
 
@@ -33,7 +27,6 @@ void MovingObject::update(const double elapsedTime,Position* onlyCalc) {
 }
 
 void MovingObject::setDirection(const Direction& newDirection) {
-	// 벡터 방향 설정
-	// 단위벡터 방향 결정은 update에서 진행한다. 효율성은 떨어지긴 하지만.. 계산이 중첩되어 값이 왜곡됨을 막기 위함
+	// 방향 결정
 	m_direction = newDirection;
 }
