@@ -5,6 +5,8 @@
 #include "pch.h"
 #include "BulletRed.h"
 
+BulletRed::BulletRed() :MovingObject{ {0.0,0.0},{0.0,0.0},0.0 }, m_bulletSize{} {}
+
 // 생성자, 이미지형태, 탄막 사이즈, 탄막 위치를 인자로 받습니다
 BulletRed::BulletRed(const CString& imageFileName, const CSize m_bulletSize, 
 	const Position position, const Direction direction,const double speed) :

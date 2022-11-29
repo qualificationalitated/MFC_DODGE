@@ -3,39 +3,56 @@
 
 void Game::render(FlickerFreeDC& dc) {
 	Gdiplus::Graphics gr(dc);
+	CFont font_300, font_200;
+	font_300.CreatePointFont(300, _T("궁서"));
+	font_200.CreatePointFont(200, _T("궁서"));
+	// 게임 시작 전 초기화면
 	if (!m_gameStarted) {
 		// 게임 시작, 초기 실행화면 설정해주기
-		dc.TextOut(m_playingArea.Width() / 2, m_playingArea.Height() / 4 * 3, _T("게임 시작을 위해 스페이스바를 눌러주세요"));
+		dc.SelectObject(&font_300);
+		SetTextAlign(dc, TA_CENTER);
+		dc.TextOut(m_playingArea.CenterPoint().x, m_playingArea.CenterPoint().y - 120, _T("MFC_Dodge"));
+		dc.SelectObject(&font_200);
+		dc.TextOut(m_playingArea.CenterPoint().x, m_playingArea.CenterPoint().y+120, _T("게임 시작을 위해 스페이스바를 눌러주세요"));
+		// dc.DrawText(, -1, m_playingArea, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 		return;
 	}
-	CString tempDir, tempTime;
-	m_gameScore = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - m_gameStartTime);
-
-	// 플레이어 이동 방향 표현
-	tempDir.Format(_T("Dir x : %d, Dir y : %d"), (int)m_player.getDirection().x, (int)m_player.getDirection().y);
-	dc.TextOut(100, 50, tempDir);
-
-	// 생존 시간을 활용한 스코어 계산
-	tempTime.Format(_T("score : %d"), m_gameScore /10);
-	dc.TextOut(100, 100, tempTime);
-
-	// 플레이어 및 객체 렌더링
-	m_player.render(dc);
 	
-	for(int i=0; i < 5; i++){
-		bulletList[i]->render(dc);
+	// 게임 진행중 화면
+	if (m_gameStarted && !m_gameEnded) {
+		CString tempDir, tempTime;
+		m_gameScore = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - m_gameStartTime);
+		
+		// 생존 시간을 활용한 스코어 계산
+		tempTime.Format(_T("score : %d"), m_gameScore.count() / 10);
+		dc.TextOut(30, 30, tempTime);
+		
+		// 화면에 나와있는 총알 갯수
+		tempTime.Format(_T("Bullet Count : %d"), m_nowBulletCount);
+		dc.TextOut(30, 50, tempTime);
+		
+		// 플레이어 및 객체 렌더링
+		m_player.render(dc);
+		for (int i = 1; i <= m_nowBulletCount; i++) 
+			bulletList[i].render(dc);
+		
+		//플레이어 히트박스 확인
+		/*
+		auto hitbox{ m_player.getHitbox() };
+		Pen pen4Hitbox(Color(255, 255, 255, 0), 2);
+		gr.DrawRectangle(&pen4Hitbox, hitbox.left, hitbox.top, hitbox.Width(), hitbox.Height());
+		*/
 	}
-	// -------------------------------------------------------------------------------------------------------------------------------------------- -
-	/*
-	m_RedBullet1.render(dc);
-	m_RedBullet2.render(dc);
-	m_RedBullet3.render(dc);
-	*/
 	
-	//플레이어 히트박스 확인
-	auto hitbox{ m_player.getHitbox() };
-	Pen pen4Hitbox(Color(255, 255, 255, 0), 2);
-	gr.DrawRectangle(&pen4Hitbox, hitbox.left, hitbox.top, hitbox.Width(), hitbox.Height());
+	// 플레이어 피격 후 화면
+	else if (m_gameEnded) {
+		CString scoreText;
+		dc.SelectObject(&font_200);
+		SetTextAlign(dc, TA_CENTER);
+		dc.TextOut(m_playingArea.CenterPoint().x , m_playingArea.CenterPoint().y, _T("게임종료!"));
+		scoreText.Format(_T("최종점수 : %d"), m_endScore);
+		dc.TextOut(m_playingArea.CenterPoint().x, m_playingArea.CenterPoint().y-30, scoreText);
+	}
 }
 
 void Game::updateBullet(double timeElapsed,BulletRed& bulletRed) {
@@ -46,22 +63,25 @@ void Game::updateBullet(double timeElapsed,BulletRed& bulletRed) {
 	Position BulletPos = bulletRed.getPosition();
 	CSize BulletSize = bulletRed.getBulletSize();
 	CRect PlayerPos = m_player.getHitbox();
-	
+	double speed = bulletRed.getSpeed();
+
 	// 벽에 닿았다면, 플레이어를 향해 이동
 	if (BulletPos.y + BulletSize.cy >= m_playingArea.bottom ||
 		BulletPos.y <= m_playingArea.top ||
 		BulletPos.x + BulletSize.cx >= m_playingArea.right ||
 		BulletPos.x <= m_playingArea.left
 		) {
+		m_initBulletSpeed < 200 ? m_initBulletSpeed += 0.5 : m_initBulletSpeed = m_initBulletSpeed;
+		speed = rand() % 150 + m_initBulletSpeed;
 		// auto oldDirection{ bulletRed.getDirection() };
 		bulletRed.setDirection(Direction{ PlayerPos.CenterPoint().x-BulletPos.x, PlayerPos.CenterPoint().y - BulletPos.y });
 	}
 	if (playerCollisionDetection(PlayerPos.left, PlayerPos.top, PlayerPos.Width(), PlayerPos.Height(), BulletPos.x, BulletPos.y, BulletSize.cx, BulletSize.cy)) {
-		// 충돌, 충돌시 게임 종료까지 되면 된다.
+		// 충돌시 게임종료
 		end();
-		bulletRed.setDirection(Direction{ -bulletRed.getDirection().x, -bulletRed.getDirection().y });
 	}
 	// 공 움직이기
+	bulletRed.setSpeed(speed);
 	bulletRed.update(timeElapsed);
 }
 
@@ -80,7 +100,7 @@ boolean Game::playerCollisionDetection(double r1x, double r1y, double r1w, doubl
 
 void Game::updatePlayer(double timeElapsed) {
 	m_player.update(timeElapsed);
-	// 벽 넘어 이동 금지
+	// 플레이어 벽 넘어 이동 금지 설정
 	// 위 경계
 	if (m_player.getHitbox().top <= m_playingArea.top)
 		m_player.setPosition({ m_player.getPosition().x, (double)m_playingArea.top });
@@ -93,11 +113,6 @@ void Game::updatePlayer(double timeElapsed) {
 	// 오른쪽 경계
 	if (m_player.getHitbox().right >= m_playingArea.right) 
 		m_player.setPosition({ (double)m_playingArea.right - m_player.getPlayerSize().cx, m_player.getPosition().y});
-	// 플레이어 접촉 확인 부분
-	// auto hitbox{ m_player.getHitbox() };
-	// if(플레이어 접촉)
-	// {m_game.setGameStatus, 게임 종료 설정해주고, 버틴 점수 띄워주기}
-
 }
 
 int Game::getGameStatus() {
@@ -109,56 +124,73 @@ int Game::getGameStatus() {
 }
 
 void Game::update() {
+	// 시작하지않았거나, 게임이 끝났다면 업데이트 하지 않는다.
 	if (!m_gameStarted || m_gameEnded)
 		return;
+
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	double timeElapsed{ std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - m_previousUpdateTime).count() / 1000.0 };
 	m_previousUpdateTime = currentTime;
 
-	// 모든 객체들 업데이트하기
-	for (int i = 0; i < 5; i++) {
-		updateBullet(timeElapsed, *bulletList[i]);
+	if ((m_gameScore.count()/10) / 200 >m_nowBulletCount-5 && m_nowBulletCount < m_maxBulletCount) {
+		bulletList[++m_nowBulletCount] = *generateBullet();
 	}
-	/*
-	updateBullet(timeElapsed, m_RedBullet1);
-	updateBullet(timeElapsed, m_RedBullet2);
-	updateBullet(timeElapsed, m_RedBullet3);
-	*/
+
+	// 모든 객체들 업데이트하기
 	updatePlayer(timeElapsed);
+	for (int i = 1; i <= m_nowBulletCount; i++) 
+		updateBullet(timeElapsed, bulletList[i]);
+	
 
 }
 
 void Game::start() {
-	srand((unsigned int)(time(NULL)));
+
+	// 게임 상태 업데이트
 	m_gameEnded = false;
 	m_gameStarted = true;
-	srand(time(NULL));
-	for (int i = 0; i < 5; i++) {
-		double speed = rand() % 100 + 150.0;
-		double randPosX{ (double)(rand() % 1020) }, randPosY{ (double)(rand() % 885) };
-		bulletList[i] = new BulletRed{ _T("BulletRed.png") ,CSize{14,14}, 
-			Position{randPosX,randPosY}, 
-			Direction{m_playingArea.CenterPoint().x - (double)randPosX ,m_playingArea.CenterPoint().y - (double)randPosY },
-			speed };
-	}
+	// 생성할 총알 갯수 설정
+	m_nowBulletCount = 5;
 
+	srand((unsigned int)(time(NULL)));
+	bulletList = new BulletRed[m_maxBulletCount+1];
+	for (int i = 1; i <= m_nowBulletCount; i++) {
+		bulletList[i] = *generateBullet();
+	}
 	m_previousUpdateTime = std::chrono::high_resolution_clock::now();
-	m_gameStartTime = std::chrono::high_resolution_clock::now();
+	m_gameStartTime = m_previousUpdateTime;
 }
 
 void Game::end(){
-	m_gameEnded = true; // 화면 정지는 된느듯
-	/* 
-	* 게임 정지시 동작
-	* 1. 플레이어 및 탄막 동작 정지
-	* 2. 화면 중앙에 플레이어 점수 표시
-	* 3. 다시 플레이 하실? 점수 표시
-	* 4. 최고기록 표시(구글 dino rush 예시)
-	* 게임 종료방법 찾아보기
-	*/ 
+	m_gameEnded = true;
+	m_endScore = m_gameScore.count() / 10;
 }
 
-// void Game::makeRedBulletGroup(){}
+BulletRed* Game::generateBullet() {
+	double speed = rand() % 150 + m_initBulletSpeed;
+	double randPosX{ (double)(rand() % 1020) }, randPosY{ (double)(rand() % 885) };
+	int loc = rand() % 4;
+	switch (loc)
+	{
+	case 0:
+		randPosX = 0.0;
+		break;
+	case 1:
+		randPosY = 0.0;
+		break;
+	case 2:
+		randPosX = m_playingArea.right-1;
+		break;
+	case 3:
+		randPosY = m_playingArea.bottom-1;
+		break;
+	}
+	return new BulletRed{ _T("BulletRed.png") ,CSize{14,14}, Position{randPosX,randPosY},
+			Direction{m_playingArea.CenterPoint().x - (double)randPosX ,m_playingArea.CenterPoint().y - (double)randPosY },
+			speed };
+}
+
+
 
 void Game::DirKeyDown(KeyDirection key) {
 	

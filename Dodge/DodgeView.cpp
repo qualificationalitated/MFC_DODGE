@@ -68,10 +68,10 @@ void CDodgeView::OnDraw(CDC* pDC)
 	Gdiplus::Graphics gr(dc);
 
 	Pen pen(Color(255, 255, 255, 0), 10);
-	SolidBrush blackBrush(Color(255, 20, 60, 170));
+	SolidBrush bgdBrush(Color(255, 17, 38, 79));
 	CRect windowRect;
 	GetClientRect(windowRect);
-	gr.FillRectangle(&blackBrush, 0, windowRect.left, windowRect.Width(), windowRect.Height());
+	gr.FillRectangle(&bgdBrush, 0, windowRect.left, windowRect.Width(), windowRect.Height());
 	gr.DrawRectangle(&pen, windowRect.top, windowRect.left, windowRect.Width(), windowRect.Height());
 
 	m_game.render(dc);

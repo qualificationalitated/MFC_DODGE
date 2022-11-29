@@ -12,6 +12,7 @@ class BulletRed : public MovingObject
 {
 public:
 	// 총알 생성함수
+	BulletRed();
 	BulletRed(const CString& imageFileName, CSize m_bulletSize,
 		Position position, Direction direction,double speed);
 
