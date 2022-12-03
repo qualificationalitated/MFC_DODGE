@@ -154,6 +154,9 @@ void Game::start() {
 	// 랜덤한 위치와 속도 부여를 위한 랜덤값 설정
 	srand((unsigned int)(time(NULL)));
 	bulletList = new BulletRed[m_maxBulletCount+1]; // 총알을 동적 생성할 객체배열
+
+	// 플레이어 위치 초기화
+	m_player.setPosition(Position{ m_playingArea.right / 2.0,m_playingArea.bottom / 2.0 });
 	
 	// 초기 총알갯수만큼 총알 생성
 	for (int i = 1; i <= m_nowBulletCount; i++) {
